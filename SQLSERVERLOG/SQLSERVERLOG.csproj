@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Test\log.xls" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="SQL\GetDBLog.sql">
@@ -57,6 +58,7 @@
     <Content Include="SQL\GetTableDefine.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Test\TB-T5.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
