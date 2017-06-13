@@ -53,6 +53,7 @@
     <None Include="Test\log.xls" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="SQL\basicknowledge.txt" />
     <Content Include="SQL\GetDBLog.sql">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
