@@ -5,3 +5,5 @@
 nchar,nvarchar: n is Unicode.
 Nvarchar优点：判断字符串的时候可以不需要考虑中英文两种字符的差别，可以避免程序中乱码的问题。
         缺点：存储英文字符会增大一倍的存储空间．但是在存储代价已经很低廉的情况下，优先考虑兼容性会给你带来更多好处的，效率没有varchar高。
+================
+EXEC( 'DBCC PAGE(' + 'Test' + ', ' + '1' + ', ' + '89' + ', 3) with tableresults,no_infomsgs;')
