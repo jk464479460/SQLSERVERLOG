@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Data;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 
 namespace SQLSERVERLOG
@@ -8,18 +8,17 @@ namespace SQLSERVERLOG
     {
         private IUtility _Utility = new Utility();
 
-        public DataTable GetLogByTable(string tableName)
+        public IList<T> GetByTable<T>(string tableName, string sql) where T : class, new()
         {
-            var sql = _Utility.GetSQLFromFile(_Utility.DBLogSql);
             var connStr = _Utility.GetConfigConnStr();
             sql = sql.Replace("<tableName>", tableName);
 
-            return ExecSQL(connStr, sql);
+            return ExecSQL<T>(connStr, sql);
         }
 
-        private DataTable ExecSQL(string connStr, string Sql)
+        private IList<T> ExecSQL<T>(string connStr, string Sql) where T:class, new()
         {
-            var dt = new DataTable();
+            var result = new List<T>();
             using (var connection = new SqlConnection(connStr))
             {
                 connection.Open();
@@ -27,42 +26,30 @@ namespace SQLSERVERLOG
                 {
                     cmd.Connection = connection;
                     var reader = cmd.ExecuteReader();
-
-                    for (var i = 0; i < reader.FieldCount; i++)
+                   
+                    while (reader.Read())
                     {
-                        dt.Columns.Add(reader.GetName(i));
-                    }
-                    while (reader.Read() && reader.HasRows)
-                    {
-                        var row = dt.NewRow();
+                        var model = new T();
                         for (var i = 0; i < reader.FieldCount; i++)
                         {
-                            if (reader.GetFieldType(i).Name == "Byte[]")
+                            var colName = reader.GetName(i);
+                            
+                            foreach(var property in model.GetType().GetProperties())
                             {
-                                var strOfBytes = string.Empty;
-                                if (string.IsNullOrEmpty(Convert.ToString(reader[i]))) continue;
-                                var bytes = (byte[])reader[i];
-                                for (var by = 0; by < bytes.Length; by++)
-                                    strOfBytes = strOfBytes + bytes[by];
-                                //row[i] = BitConverter.ToUInt64(bytes, 0);
+                                if (colName.Equals(property.Name, StringComparison.OrdinalIgnoreCase))
+                                    property.SetValue(model, reader[i]);
                             }
-                            else
-                            {
-                                row[i] = reader[i];
-                            }
-                          
                         }
-                        dt.Rows.Add(row);
+                        result.Add(model);
                     }
                 }
-
-                return dt;
             }
+            return result;
         }
     }
 
     public interface IDb
     {
-        DataTable GetLogByTable(string tableName);
+        IList<T> GetByTable<T>(string tableName, string sql) where T : class, new();
     }
 }
