@@ -11,6 +11,15 @@ namespace SQLSERVERLOG
         private const string keyConnStr = "ConnStr";
 
         public string DBLogSql { get { return "GetDBLog.sql"; } }
+
+        public string PageSql
+        {
+            get
+            {
+                return "Page.sql";
+            }
+        }
+
         public string TableDefineSql { get { return "GetTableDefine.sql"; } }
 
         public string GetConfigConnStr()
@@ -148,6 +157,7 @@ namespace SQLSERVERLOG
     {
         string TableDefineSql { get; }
         string DBLogSql { get; }
+        string PageSql { get; }
 
         string GetConfigConnStr();
         string GetSQLFromFile(string fileName);

@@ -61,10 +61,16 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="SQL\GetDBLog.sql">
+    <Content Include="..\SQLSERVERLOG\SQL\GetDBLog.sql">
+      <Link>SQL\GetDBLog.sql</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SQL\GetTableDefine.sql">
+    <Content Include="..\SQLSERVERLOG\SQL\GetTableDefine.sql">
+      <Link>SQL\GetTableDefine.sql</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\SQLSERVERLOG\SQL\Page.sql">
+      <Link>SQL\Page.sql</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

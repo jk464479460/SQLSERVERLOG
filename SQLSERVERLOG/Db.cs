@@ -15,7 +15,11 @@ namespace SQLSERVERLOG
 
             return ExecSQL<T>(connStr, sql);
         }
-
+        public IList<T> GetData<T>(string sql) where T : class, new()
+        {
+            var connStr = _Utility.GetConfigConnStr();
+            return ExecSQL<T>(connStr, sql);
+        }
         private IList<T> ExecSQL<T>(string connStr, string Sql) where T:class, new()
         {
             var result = new List<T>();
@@ -51,5 +55,6 @@ namespace SQLSERVERLOG
     public interface IDb
     {
         IList<T> GetByTable<T>(string tableName, string sql) where T : class, new();
+        IList<T> GetData<T>(string sql) where T : class, new();
     }
 }

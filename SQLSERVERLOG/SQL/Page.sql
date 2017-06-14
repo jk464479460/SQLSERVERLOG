@@ -1,0 +1,1 @@
+﻿exec('dbcc page(''<db>'',1,<pageId>,3) with tableresults')

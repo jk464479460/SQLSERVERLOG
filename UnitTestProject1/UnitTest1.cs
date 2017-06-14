@@ -56,5 +56,17 @@ namespace UnitTestProject1
             }
         }
 
+        [TestMethod]
+        public void TestDBpage()
+        {
+            IDb db = new Db();
+            var dbName = "test";
+            var pageId= "89";
+            var sql = _Utility.GetSQLFromFile(_Utility.PageSql);
+            sql = sql.Replace("<pageId>", pageId);
+            sql = sql.Replace("<db>", dbName);
+            var pageData = db.GetData<PageInfo>(sql);
+        }
+
     }
 }
