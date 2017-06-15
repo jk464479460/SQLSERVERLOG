@@ -132,6 +132,35 @@ namespace SQLSERVERLOG
             //获取完毕
         }
 
+        public string ConvDECtoHexStr(int hex)
+        {
+            var hexStr = Convert.ToString(hex, 16);
+            return "0x" + hexStr;
+        }
+
+        public int ConvHexStrtoDEC(string hex)
+        {
+            var res = Convert.ToInt32(hex, 16);
+            return res;
+        }
+
+        public byte[] strToToHexByte(string hexString)
+        {
+            if (hexString.Contains("hexString"))
+                hexString = hexString.Replace("0x", "");
+            hexString = hexString.Replace(" ", "");
+            if ((hexString.Length % 2) != 0)
+                hexString += " ";
+            byte[] returnBytes = new byte[hexString.Length / 2];
+            for (int i = 0; i < returnBytes.Length; i++)
+            {
+                var subHexStr = hexString.Substring(i * 2, 2);
+                returnBytes[i] = Convert.ToByte(subHexStr.Replace(" ", ""), 16);
+            }
+
+            return returnBytes;
+        }
+
         private SqlDbType GetDbType(string name)
         {
             switch (name)
@@ -164,5 +193,9 @@ namespace SQLSERVERLOG
 
         void TranslateData(byte[] data, Datacolumn[] columns);
         IList<Datacolumn> GetDatacolumn(IList<TableDefine> tableSchema);
+
+        string ConvDECtoHexStr(int hex);
+        int ConvHexStrtoDEC(string hex);
+        byte[] strToToHexByte(string hexString);
     }
 }
