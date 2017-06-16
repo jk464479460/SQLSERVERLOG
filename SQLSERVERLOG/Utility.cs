@@ -12,6 +12,8 @@ namespace SQLSERVERLOG
 
         public string DBLogSql { get { return "GetDBLog.sql"; } }
 
+        public string TableDefineSql { get { return "GetTableDefine.sql"; } }
+
         public string PageSql
         {
             get
@@ -19,8 +21,6 @@ namespace SQLSERVERLOG
                 return "Page.sql";
             }
         }
-
-        public string TableDefineSql { get { return "GetTableDefine.sql"; } }
 
         public string GetConfigConnStr()
         {
@@ -144,10 +144,32 @@ namespace SQLSERVERLOG
             return res;
         }
 
+        public IList<PageInfo> FilterPageBySlot(int parentSlot, int slot, IList<PageInfo> pageInfo)
+        {
+            var result = new List<PageInfo>();
+            foreach(var page in pageInfo)
+            {
+                var parentObject = page.ParentObject;
+                var obj = page.Object;
+
+                var arr = parentObject.Split(' ');
+                if (arr.Length < 2) continue;
+                if (!arr[0].Equals("slot", StringComparison.OrdinalIgnoreCase)) continue;
+                if (!arr[1].Equals($"{parentSlot}", StringComparison.OrdinalIgnoreCase)) continue;
+
+                arr = obj.Split(' ');
+                if (arr.Length < 2) continue;
+                if (!arr[0].Equals("slot", StringComparison.OrdinalIgnoreCase)) continue;
+                if (!arr[1].Equals($"{slot}", StringComparison.OrdinalIgnoreCase)) continue;
+                result.Add(page);
+            }
+            return result;
+        }
+
         public byte[] strToToHexByte(string hexString)
         {
-            if (hexString.Contains("hexString"))
-                hexString = hexString.Replace("0x", "");
+            hexString = hexString.Replace("0x", "");
+
             hexString = hexString.Replace(" ", "");
             if ((hexString.Length % 2) != 0)
                 hexString += " ";
@@ -193,6 +215,8 @@ namespace SQLSERVERLOG
 
         void TranslateData(byte[] data, Datacolumn[] columns);
         IList<Datacolumn> GetDatacolumn(IList<TableDefine> tableSchema);
+
+        IList<PageInfo> FilterPageBySlot(int parentSlot, int slot, IList<PageInfo> pageInfo);
 
         string ConvDECtoHexStr(int hex);
         int ConvHexStrtoDEC(string hex);

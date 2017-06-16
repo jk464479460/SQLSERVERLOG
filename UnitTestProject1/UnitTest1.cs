@@ -18,6 +18,7 @@ namespace UnitTestProject1
             IDb db = new Db();
             var dt=db.GetByTable<DBLog>("log_test", _Utility.GetSQLFromFile(_Utility.DBLogSql));
         }
+
         [TestMethod]
         public void TestTableDefine()
         {
@@ -32,6 +33,7 @@ namespace UnitTestProject1
             var dt = db.GetByTable<TableDefine>("log_test", _Utility.GetSQLFromFile(_Utility.TableDefineSql));
             var datacolumns = _Utility.GetDatacolumn(dt);
         }
+
         [TestMethod]
         public void TestDataRecovery()
         {
@@ -68,5 +70,21 @@ namespace UnitTestProject1
             var pageData = db.GetData<PageInfo>(sql);
         }
 
+        [TestMethod]
+        public void TestFilterPageBySlot()
+        {
+            IDb db = new Db();
+            var logData = db.GetByTable<DBLog>("log_test", _Utility.GetSQLFromFile(_Utility.DBLogSql));
+
+            var dbName = "test";
+            var pageId = "314";
+            var sql = _Utility.GetSQLFromFile(_Utility.PageSql);
+            sql = sql.Replace("<pageId>", pageId);
+            sql = sql.Replace("<db>", dbName);
+            var pageData = db.GetData<PageInfo>(sql);
+            var dbLog = new DBLog();
+            if (logData.Count > 0) dbLog = logData[0];
+            var result=_Utility.FilterPageBySlot(dbLog.SlotId, dbLog.SlotId, pageData);
+        }
     }
 }
