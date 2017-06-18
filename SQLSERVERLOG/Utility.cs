@@ -151,7 +151,7 @@ namespace SQLSERVERLOG
                 if (string.IsNullOrEmpty(arrObject[5])) continue;
                 
                 var tempOffset= ConvHexStrtoDEC(arrObject[5]);
-                if (offSet >= tempOffset)
+                if (offSet >= tempOffset && currentFieldOffset<=tempOffset)
                 {
                     currentFieldOffset = tempOffset;
                     currentField = pageSlot;
@@ -170,33 +170,23 @@ namespace SQLSERVERLOG
             switch (colType.TypeName)
             {
                 case "datetime":
-                    var result = string.Empty;
-                    var result2 = string.Empty;
+                    TranslateDT(relativeOffsetInField, currentField, data0, data1);
+                    break;
+                case "char":
+                case "varchar":
+                    var currentValueOfColumn = currentField.Value;
+                    var data0Str = Encoding.Default.GetString(data0);
+                    var arr=currentValueOfColumn.ToArray();
+                    var sb = new StringBuilder();
 
-                    if(relativeOffsetInField == 0) //seconds
+                    for (var i = 0; i < data0Str.Length; i++)
                     {
-
+                        arr[relativeOffsetInField + i] = data0Str[i];
                     }
-                    if (relativeOffsetInField == 4) //days
-                    {
-                        for(var i = data0.Length - 1; i >= 0; i--)
-                        {
-                            result = $"{ConvDECtoHexStr(data0[i])}{result}";
-                        }
-                       
-                        var afterValue = DateTime.Parse(currentField.Value);
-                        for (var i = data1.Length - 1; i >= 0; i--)
-                        {
-                            result2 = $"{ConvDECtoHexStr(data1[i])}{result2}";
-                        }
-                        var diffDays = Convert.ToInt32(result2, 16) - Convert.ToInt32(result, 16);
-                        var beforeValue = afterValue.AddDays(-diffDays);
-                        var sb = new StringBuilder();
-                        sb.Append($"{currentField.Field}\n");
-                        sb.Append($"\t{beforeValue} \t{afterValue}");
-                        Trace.WriteLine(sb.ToString());
-                    }
-
+                    sb.Append($"{currentField.Field}\n");
+                    sb.Append($"\t{string.Join("",arr)} \t{currentValueOfColumn}");
+                    Trace.WriteLine(sb.ToString());
+                    currentField.Value=string.Join("", arr);
                     break;
             }
         }
@@ -204,6 +194,7 @@ namespace SQLSERVERLOG
         public string ConvDECtoHexStr(int hex)
         {
             var hexStr = Convert.ToString(hex, 16);
+            if (hexStr.Length % 2 != 0) hexStr = "0" + hexStr;
             return hexStr;
         }
 
@@ -252,6 +243,7 @@ namespace SQLSERVERLOG
             return returnBytes;
         }
 
+        #region local
         private SqlDbType GetDbType(string name)
         {
             switch (name)
@@ -271,6 +263,72 @@ namespace SQLSERVERLOG
             }
             throw new NotSupportedException();
         }
+
+        private void TranslateDT(int relativeOffsetInField, PageInfo currentField, byte[] data0, byte[] data1)
+        {
+            var result = "00";
+            var result2 = "00";
+            var skipIndex = 0;
+            var skipIndex1 = 0;
+            var afterValue = DateTime.Parse(currentField.Value);
+
+            if (data0.Length > 4) skipIndex = 4;
+            if (data1.Length > 4) skipIndex1 = 4;
+
+            var sb = new StringBuilder();
+            var currentValueOfColumn = currentField.Value;
+
+            if (relativeOffsetInField == 0) //seconds
+            {
+                for (var i = (skipIndex == 4 ? skipIndex - 1 : data0.Length - 1); i >= 0; i--)
+                {
+                    result = $"{result}{ConvDECtoHexStr(data0[i])}";
+                }
+
+                for (var i = (skipIndex1 == 4 ? skipIndex1 - 1 : data1.Length - 1); i >= 0; i--)
+                {
+                    result2 = $"{result2}{ConvDECtoHexStr(data1[i])}";
+                }
+
+                var diffDays = Convert.ToInt64(result2, 16) - Convert.ToInt64(result, 16);
+
+                var beforeValue = afterValue.AddSeconds(-diffDays / 300);
+
+                if (skipIndex != 4 || skipIndex1 != 4)
+                {
+                    sb.Append($"{currentField.Field}\n");
+                    sb.Append($"\t{beforeValue} \t{currentValueOfColumn}");
+                    Trace.WriteLine(sb.ToString());
+                }
+
+                currentField.Value = beforeValue.ToString("yyyy-MM-dd HH:mm:ss");
+                afterValue = DateTime.Parse(currentField.Value);
+            }
+            if (relativeOffsetInField == 4 || skipIndex == 4 || skipIndex1 == 4) //days
+            {
+                result = "00";
+                result2 = "00";
+                for (var i = data0.Length - 1; i >= skipIndex; i--)
+                {
+                    result = $"{result}{ConvDECtoHexStr(data0[i])}";
+                }
+
+                for (var i = data1.Length - 1; i >= skipIndex1; i--)
+                {
+                    result2 = $"{result2}{ConvDECtoHexStr(data1[i])}";
+                }
+
+                var diffDays = Convert.ToInt64(result2, 16) - Convert.ToInt64(result, 16);
+                var beforeValue = afterValue.AddDays(-diffDays);
+
+                sb.Append($"{currentField.Field}\n");
+                sb.Append($"\t{beforeValue} \t{currentValueOfColumn}");
+                Trace.WriteLine(sb.ToString());
+                currentField.Value = beforeValue.ToString("yyyy-MM-dd HH:mm:ss");
+            }
+        }
+
+        #endregion
     }
 
     public interface IUtility

@@ -4,6 +4,7 @@ using SQLSERVERLOG;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+using System.Linq;
 
 namespace UnitTestProject1
 {
@@ -42,18 +43,24 @@ namespace UnitTestProject1
 
             var dt = db.GetByTable<TableDefine>("log_test", _Utility.GetSQLFromFile(_Utility.TableDefineSql));
 
-            foreach(var log in logData)
+            var dbName = "test";
+            var pageData = new List<PageInfo>();
+
+            foreach (var log in logData)
             {
-                var dbName = "test";
                 var pageId = Convert.ToInt32(log.PageId.Split(':')[1], 16);
-                var sql = _Utility.GetSQLFromFile(_Utility.PageSql);
-                sql = sql.Replace("<pageId>", $"{pageId}");
-                sql = sql.Replace("<db>", dbName);
-                var pageData = db.GetData<PageInfo>(sql);
-                pageData = _Utility.FilterPageBySlot(log.SlotId, log.SlotId, pageData);
+                if(!pageData.Exists(x=>x.ParentObject.Contains($"Slot {log.SlotId}")))
+                {
+                    var sql = _Utility.GetSQLFromFile(_Utility.PageSql);
+                    sql = sql.Replace("<pageId>", $"{pageId}");
+                    sql = sql.Replace("<db>", dbName);
+                    pageData.AddRange(db.GetData<PageInfo>(sql).ToList());
+                }
+
+                var pageDataFilterBySlot = _Utility.FilterPageBySlot(log.SlotId, log.SlotId, pageData);
                 if (log.Operation.Equals("LOP_MODIFY_ROW"))
                 {
-                    _Utility.ModifyRow(pageData, dt, log.Offset, log.R0, log.R1);
+                    _Utility.ModifyRow(pageDataFilterBySlot, dt, log.Offset, log.R0, log.R1);
                     continue;
                 }
                 var bytesArr = log.R0;
