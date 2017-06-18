@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace SQLSERVERLOG
 {
@@ -132,10 +135,76 @@ namespace SQLSERVERLOG
             //获取完毕
         }
 
+        //LOP_MODIFY_ROW
+        public void ModifyRow(IList<PageInfo> pageSlotInfoList, IList<TableDefine> tableSchema, int offSet,byte[] data0, byte[] data1)
+        {
+            if (pageSlotInfoList.Count == 0) throw new NotSupportedException();
+            if (tableSchema.Count == 0) throw new NotSupportedException();
+
+            var currentFieldOffset = -9999;
+            var currentField = new PageInfo();
+
+            foreach (var pageSlot in pageSlotInfoList)
+            {
+                var arrObject = pageSlot.Object.Split(' ');
+                if (arrObject.Length < 6) continue;
+                if (string.IsNullOrEmpty(arrObject[5])) continue;
+                
+                var tempOffset= ConvHexStrtoDEC(arrObject[5]);
+                if (offSet >= tempOffset)
+                {
+                    currentFieldOffset = tempOffset;
+                    currentField = pageSlot;
+                } 
+            }
+
+            if (currentFieldOffset == -9999)
+                throw new NotSupportedException();
+
+            var relativeOffsetInField = offSet - currentFieldOffset;
+            var colType = tableSchema.Where(x => x.ColName.Equals(currentField.Field, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+
+            if (colType == null) throw new NotSupportedException();
+
+            
+            switch (colType.TypeName)
+            {
+                case "datetime":
+                    var result = string.Empty;
+                    var result2 = string.Empty;
+
+                    if(relativeOffsetInField == 0) //seconds
+                    {
+
+                    }
+                    if (relativeOffsetInField == 4) //days
+                    {
+                        for(var i = data0.Length - 1; i >= 0; i--)
+                        {
+                            result = $"{ConvDECtoHexStr(data0[i])}{result}";
+                        }
+                       
+                        var afterValue = DateTime.Parse(currentField.Value);
+                        for (var i = data1.Length - 1; i >= 0; i--)
+                        {
+                            result2 = $"{ConvDECtoHexStr(data1[i])}{result2}";
+                        }
+                        var diffDays = Convert.ToInt32(result2, 16) - Convert.ToInt32(result, 16);
+                        var beforeValue = afterValue.AddDays(-diffDays);
+                        var sb = new StringBuilder();
+                        sb.Append($"{currentField.Field}\n");
+                        sb.Append($"\t{beforeValue} \t{afterValue}");
+                        Trace.WriteLine(sb.ToString());
+                    }
+
+                    break;
+            }
+        }
+
         public string ConvDECtoHexStr(int hex)
         {
             var hexStr = Convert.ToString(hex, 16);
-            return "0x" + hexStr;
+            return hexStr;
         }
 
         public int ConvHexStrtoDEC(string hex)
@@ -215,6 +284,7 @@ namespace SQLSERVERLOG
 
         void TranslateData(byte[] data, Datacolumn[] columns);
         IList<Datacolumn> GetDatacolumn(IList<TableDefine> tableSchema);
+        void ModifyRow(IList<PageInfo> pageSlotInfoList, IList<TableDefine> tableSchema, int offSet, byte[] data0, byte[] data1);
 
         IList<PageInfo> FilterPageBySlot(int parentSlot, int slot, IList<PageInfo> pageInfo);
 

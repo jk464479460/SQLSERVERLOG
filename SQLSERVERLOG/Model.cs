@@ -22,6 +22,7 @@ namespace SQLSERVERLOG
         }
     }
 
+
     public class DBLog
     {
         public string AllocUnitName { get; set; }

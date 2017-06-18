@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQLSERVERLOG", "SQLSERVERLO
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestProject1", "UnitTestProject1\UnitTestProject1.csproj", "{10A3360F-900F-450F-A36E-804C31558FB8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console_0", "..\ConsoleApplication11\ConsoleApplication11\Console_0.csproj", "{9E80EE0A-93C2-423A-B04E-76097D63A804}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console_0", "Console_0\Console_0.csproj", "{713DB766-B699-4EFD-8DF7-F8640A881F6E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{10A3360F-900F-450F-A36E-804C31558FB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10A3360F-900F-450F-A36E-804C31558FB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10A3360F-900F-450F-A36E-804C31558FB8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9E80EE0A-93C2-423A-B04E-76097D63A804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9E80EE0A-93C2-423A-B04E-76097D63A804}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9E80EE0A-93C2-423A-B04E-76097D63A804}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9E80EE0A-93C2-423A-B04E-76097D63A804}.Release|Any CPU.Build.0 = Release|Any CPU
+		{713DB766-B699-4EFD-8DF7-F8640A881F6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{713DB766-B699-4EFD-8DF7-F8640A881F6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{713DB766-B699-4EFD-8DF7-F8640A881F6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{713DB766-B699-4EFD-8DF7-F8640A881F6E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

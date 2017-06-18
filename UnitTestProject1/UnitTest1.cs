@@ -44,6 +44,18 @@ namespace UnitTestProject1
 
             foreach(var log in logData)
             {
+                var dbName = "test";
+                var pageId = Convert.ToInt32(log.PageId.Split(':')[1], 16);
+                var sql = _Utility.GetSQLFromFile(_Utility.PageSql);
+                sql = sql.Replace("<pageId>", $"{pageId}");
+                sql = sql.Replace("<db>", dbName);
+                var pageData = db.GetData<PageInfo>(sql);
+                pageData = _Utility.FilterPageBySlot(log.SlotId, log.SlotId, pageData);
+                if (log.Operation.Equals("LOP_MODIFY_ROW"))
+                {
+                    _Utility.ModifyRow(pageData, dt, log.Offset, log.R0, log.R1);
+                    continue;
+                }
                 var bytesArr = log.R0;
                 var datacolumns = _Utility.GetDatacolumn(dt);
                 _Utility.TranslateData(bytesArr, ((List<Datacolumn>)datacolumns).ToArray());
@@ -86,5 +98,6 @@ namespace UnitTestProject1
             if (logData.Count > 0) dbLog = logData[0];
             var result=_Utility.FilterPageBySlot(dbLog.SlotId, dbLog.SlotId, pageData);
         }
+
     }
 }
